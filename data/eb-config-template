@@ -1,0 +1,5 @@
+global:
+  application_name: $EB_APP_NAME
+  default_region: $AWS_DEFAULT_REGION
+  profile: eb-cli
+  sc: git
