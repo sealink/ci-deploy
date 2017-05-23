@@ -14,7 +14,8 @@ eb use "$EB_ENV_NAME"
 
 JQ_QUERY='.ApplicationVersions[] | select(.VersionLabel == "'"$TAG"'")'
 if aws elasticbeanstalk describe-application-versions --application-name "$EB_APP_NAME" | "$JQ_PATH" -e "$JQ_QUERY"; then
-  exec eb deploy -nh --version "$TAG"
+  eb deploy -nh --version "$TAG"
+  exit
 fi
 
 envsubst < Dockerrun.aws.json.template > Dockerrun.aws.json
