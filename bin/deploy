@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+export TAG="$(git tag --points-at HEAD | head -n1)"
+[ -n "$TAG" ] || ( >&2 echo No tags to be deployed. && exit 1 )
+[[ "$TAG" != base-* ]] || export BUILDING_BASE_IMAGE=1
+
+cd "$(dirname "$0")"
+
+. ./get-jq
+./docker-build
+[ -n "$BUILDING_BASE_IMAGE" ] || ./eb-deploy

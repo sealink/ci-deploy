@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+mkdir -vp \
+  ~/.aws \
+  "$SEMAPHORE_PROJECT_DIR/.elasticbeanstalk"
+
+envsubst < ../data/aws-config-template > ~/.aws/config
+envsubst < ../data/eb-config-template > "$SEMAPHORE_PROJECT_DIR/.elasticbeanstalk/config.yml"
+
+cd "$SEMAPHORE_PROJECT_DIR"
+
+eb use "$EB_ENV_NAME"
+
+JQ_QUERY='.ApplicationVersions[] | select(.VersionLabel == "'"$TAG"'")'
+if aws elasticbeanstalk describe-application-versions --application-name "$EB_APP_NAME" | "$JQ_PATH" -e "$JQ_QUERY"; then
+  eb deploy -nh --version "$TAG"
+  exit
+fi
+
+envsubst < Dockerrun.aws.json.template > Dockerrun.aws.json
+eb deploy -nh -l "$TAG"

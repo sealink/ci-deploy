@@ -1,0 +1,21 @@
+#!/bin/bash
+set -e
+
+if [ -n "$JQ_PATH" ]; then
+  echo Skip jq setup because JQ_PATH is set already.
+  return
+fi
+
+JQ_VERSION=1.5
+JQ_RELEASE_URL=https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+export JQ_PATH="$SEMAPHORE_CACHE_DIR/jq/$JQ_VERSION"
+
+mkdir -vp "$(dirname "$JQ_PATH")"
+if [ -e "$JQ_PATH" ]; then
+  echo Skip downloading jq because it is cached.
+  return
+fi
+
+curl -L "-o$JQ_PATH" "$JQ_RELEASE_URL"
+sha256sum -c ../data/jq-sha256sum < "$JQ_PATH"
+chmod -v +x "$JQ_PATH"
