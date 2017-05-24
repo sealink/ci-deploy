@@ -15,6 +15,10 @@ fi
 
 [ -n "$ECR_REGION" ] || ECR_REGION="$AWS_DEFAULT_REGION"
 
+export \
+  ECR_REGION \
+  DOCKER_IMAGE
+
 cd "$(dirname "$0")"
 
 . ./get-jq
