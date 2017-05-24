@@ -1,16 +1,6 @@
 #!/bin/bash
 set -e
 
-if [ -n "$BUILDING_APP_IMAGE" ]; then
-  DOCKER_IMAGE="$APP_ECR_IMAGE"
-  ECR_REGION="$APP_ECR_REGION"
-else
-  DOCKER_IMAGE="$BASE_ECR_IMAGE"
-  ECR_REGION="$BASE_ECR_REGION"
-fi
-
-[ -n "$ECR_REGION" ] || ECR_REGION="$AWS_DEFAULT_REGION"
-
 JQ_QUERY='.repositories[] | select(.repositoryUri == "'"$DOCKER_IMAGE"'") | .repositoryName'
 ECR_REPOSITORY_NAME="$(aws ecr describe-repositories --region "$ECR_REGION" | "$JQ_PATH" -r "$JQ_QUERY")"
 [ -n "$ECR_REPOSITORY_NAME" ] || ( >&2 echo "Can't find the ECR repository."  && exit 1 )
