@@ -5,6 +5,20 @@ export TAG="$(git tag --points-at HEAD | head -n1)"
 [ -n "$TAG" ] || ( >&2 echo No tags to be deployed. && exit 1 )
 [[ "$TAG" == base-* ]] || export BUILDING_APP_IMAGE=1
 
+if [ -n "$BUILDING_APP_IMAGE" ]; then
+  DOCKER_IMAGE="$APP_ECR_IMAGE"
+  ECR_REGION="$APP_ECR_REGION"
+else
+  DOCKER_IMAGE="$BASE_ECR_IMAGE"
+  ECR_REGION="$BASE_ECR_REGION"
+fi
+
+[ -n "$ECR_REGION" ] || ECR_REGION="$AWS_DEFAULT_REGION"
+
+export \
+  ECR_REGION \
+  DOCKER_IMAGE
+
 cd "$(dirname "$0")"
 
 . ./get-jq
