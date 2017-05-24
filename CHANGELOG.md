@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## 1.0.0 Unreleased
+## 1.0.0
 
 * [DO-7] Allow building the base image in a different region
 
