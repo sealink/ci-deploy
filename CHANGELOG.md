@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## 1.0.1 Unreleased
+## 1.0.1
 
 * [DO-7] Correct the way it passes the DOCKER_IMAGE variable
 
