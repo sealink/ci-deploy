@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+export TAG="$(git tag --points-at HEAD | head -n1)"
+[ -n "$TAG" ] || ( >&2 echo No tags to be deployed. && exit 1 )
+[[ "$TAG" == base-* ]] || export BUILDING_APP_IMAGE=1

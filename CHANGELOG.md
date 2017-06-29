@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [DO-40] Provide the script for determining the deploying tag
+
 ## 1.0.1
 
 * [DO-7] Correct the way it passes the DOCKER_IMAGE variable
