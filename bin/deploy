@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
 
-export TAG="$(git tag --points-at HEAD | head -n1)"
-[ -n "$TAG" ] || ( >&2 echo No tags to be deployed. && exit 1 )
-[[ "$TAG" == base-* ]] || export BUILDING_APP_IMAGE=1
+SCRIPT_DIR="$(dirname "$0")"
+
+[ -n "$TAG" ] || . "$SCRIPT_DIR/get-tag"
 
 if [ -n "$BUILDING_APP_IMAGE" ]; then
   DOCKER_IMAGE="$APP_ECR_IMAGE"
@@ -19,7 +19,7 @@ export \
   ECR_REGION \
   DOCKER_IMAGE
 
-cd "$(dirname "$0")"
+cd "$SCRIPT_DIR"
 
 . ./get-jq
 ./docker-build
