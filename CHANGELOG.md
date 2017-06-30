@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.1.0
 
 * [DO-40] Provide the script for determining the deploying tag
 
