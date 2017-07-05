@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## 1.2.0
+## Unreleased
 
 * [DO-44] Add ECS deployment support
 
