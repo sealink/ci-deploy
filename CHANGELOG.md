@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## 1.2.0
+
+* [DO-44] Add ECS deployment support
+
 ## 1.1.0
 
 * [DO-40] Provide the script for determining the deploying tag
