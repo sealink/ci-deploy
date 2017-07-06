@@ -14,7 +14,7 @@ use ECR, ECS and Elastic Beanstalk.
     1. If the tag name starts with `base-`, the image will be built and pushed
        but not deployed.
 1. For ECS:
-    1. Create the task revsioion.
+    1. Create the task revision.
     1. Update the service with the revision.
 
 ## Environment variables
