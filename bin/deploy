@@ -23,4 +23,20 @@ cd "$SCRIPT_DIR"
 
 . ./get-jq
 ./docker-build
-[ -z "$BUILDING_APP_IMAGE" ] || ./eb-deploy
+
+[ -n "$BUILDING_APP_IMAGE" ] || exit 0
+
+[ -n "$CI_DEPLOY_TYPE" ] || CI_DEPLOY_TYPE=eb
+
+case "$CI_DEPLOY_TYPE" in
+  eb)
+    ./eb-deploy
+  ;;
+  ecs)
+    ./ecs-deploy
+  ;;
+  *)
+    >&2 echo "Unsupport deployment type: $CI_DEPLOY_TYPE"
+    exit 1
+  ;;
+esac

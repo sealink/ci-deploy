@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+cd "$SEMAPHORE_PROJECT_DIR"
+
+CONTAINER_DEFINITIONS="$(envsubst < esc-container-template.json)"
+JQ_QUERY=.taskDefinition.taskDefinitionArn
+TASK_ARN="$(aws ecs register-task-definition --container-definitions "$CONTAINER_DEFINITIONS" --family "$ECS_FAMILY" | $JQ_PATH -r -e "$JQ_QUERY")"
+[ -n "$TASK_ARN" ] || (>&2 echo Failed to register the task definition. && exit 1)
+aws ecs update-service --cluster "$ECS_CLUSTER" --service "$ECS_SERVICE" --task-definition "$TASK_ARN"
