@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.3.0
 
 * [DO-62] Address the backward incompatibility of Docker removing the email flag
 
