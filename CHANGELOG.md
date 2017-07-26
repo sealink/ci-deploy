@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [DO-62] Address the backward incompatibility of Docker removing the email flag
+
 ## 1.2.0
 
 * [DO-44] Add ECS deployment support
