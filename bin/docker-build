@@ -16,7 +16,7 @@ rm -Rf ~/.{rbenv,phpbrew,nvm}
 DOCKERFILE=Dockerfile
 [ -n "$BUILDING_APP_IMAGE" ] || DOCKERFILE=Dockerfile.base
 
-$(aws ecr get-login --region "$ECR_REGION")
+$(aws ecr get-login --no-include-email --region "$ECR_REGION")
 [ -z "$BASE_ECR_REGION" ] || $(aws ecr get-login --region "$BASE_ECR_REGION")
 docker build --build-arg VERSION="$TAG" -f "$SEMAPHORE_PROJECT_DIR/$DOCKERFILE" -t "$DOCKER_IMAGE":"$TAG" "$SEMAPHORE_PROJECT_DIR"
 docker push "$DOCKER_IMAGE":"$TAG"
