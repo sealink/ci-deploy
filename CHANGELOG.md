@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [DO-62] Update another Docker login command; missed from 1.3.0
+
 ## 1.3.0
 
 * [DO-62] Address the backward incompatibility of Docker removing the email flag
