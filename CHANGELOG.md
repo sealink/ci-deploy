@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [DO-72] Automate blue/green EB deployment
+
 ## 1.3.1
 
 * [DO-62] Update another Docker login command; missed from 1.3.0

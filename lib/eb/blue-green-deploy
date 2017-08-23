@@ -1,0 +1,185 @@
+#!/usr/bin/env bash
+
+. "$CI_DEPLOY_DIR/lib/eb/configure-cli"
+
+ebg_clone() {
+  ebg_fail_if_cloned
+  eb_configure_cli
+
+  pushd "$SEMAPHORE_PROJECT_DIR"
+  eb use "$EB_ENV_NAME"
+  eb clone -nh -n "$(ebg_clone_name)"
+  if ebg_has_worker; then
+    eb use "$EB_WORKER_ENV_NAME"
+    eb clone -nh -n "$(ebg_worker_clone_name)"
+  fi
+  popd
+
+  ebg_rememeber_to_cleanup
+}
+
+ebg_swap_to_clone() {
+  ebg_scale_out_clone
+  ! ebg_has_worker || ebg_scale_out_worker_clone
+  ebg_when_env_ready "$(ebg_clone_name)"
+  ebg_swap
+}
+
+ebg_swap_to_original() {
+  ebg_when_env_ready "$(ebg_worker_clone_name)"
+  if ebg_has_worker; then
+    pushd "$SEMAPHORE_PROJECT_DIR"
+    eb use "$EB_WORKER_ENV_NAME"
+    eb deploy -nh --version "$TAG"
+    popd
+  fi
+  ebg_when_env_ready "$EB_ENV_NAME"
+  ebg_swap
+  ! ebg_has_worker || ebg_when_env_ready "$EB_WORKER_ENV_NAME"
+}
+
+ebg_swap() {
+  pushd "$SEMAPHORE_PROJECT_DIR"
+  eb use "$(ebg_clone_name)"
+  eb swap -n "$EB_ENV_NAME"
+  popd
+}
+
+ebg_has_worker() {
+  [ -n "$EB_WORKER_ENV_NAME" ]
+}
+
+ebg_rememeber_to_cleanup() {
+  trap "ebg_cleanup '$(ebg_cname)'" EXIT
+}
+
+ebg_clone_name() {
+  echo "$EB_ENV_NAME$(ebg_clone_suffix)"
+}
+
+ebg_worker_clone_name() {
+  echo "$EB_WORKER_ENV_NAME$(ebg_clone_suffix)"
+}
+
+ebg_clone_suffix() {
+  local suffix="$CLONE_EB_ENV_NAME_SUFFIX"
+  [ -n "$suffix" ] || suffix=-clone
+  echo "$suffix"
+}
+
+ebg_fail_if_cloned() {
+  ebg_is_cloned || return 0
+  >&2 echo A clone of the environment already exists.
+  exit 1
+}
+
+ebg_is_cloned() {
+  ebg_exists "$(ebg_clone_name)" || ebg_exists "$(ebg_worker_clone_name)"
+}
+
+ebg_exists() {
+  local name="$1"
+
+  aws elasticbeanstalk describe-environments \
+    --application-name "$EB_APP_NAME" |
+  "$JQ_PATH" \
+    -e \
+    --arg name "$name" \
+    '.Environments[] | select(.EnvironmentName == $name and .Status != "Terminated")'
+}
+
+ebg_cname() {
+  aws elasticbeanstalk describe-environments \
+    --application-name "$EB_APP_NAME" \
+    --environment-names "$EB_ENV_NAME" |
+  "$JQ_PATH" -e -r \
+    '[.Environments[] | select(.Status != "Terminated")][0].CNAME'
+}
+
+ebg_cleanup() {
+  local orig_cname="$1"
+
+  if [ "$(ebg_cname)" = "$orig_cname" ]; then
+    ebg_terminate_clone
+    return
+  fi
+
+  >&2 echo 'Deployment failed.  CNAME is pointing to the clone environment.'
+  exit 1
+}
+
+ebg_terminate_clone() {
+  pushd "$SEMAPHORE_PROJECT_DIR"
+  for name in "$(ebg_clone_name)" "$(ebg_worker_clone_name)"; do
+    ebg_exists "$name" || continue
+    eb use "$name"
+    while :; do
+      eb terminate -nh --force || continue
+      break
+    done
+  done
+  popd
+}
+
+ebg_scale_out_clone() {
+  ebg_scale_out "$(ebg_clone_name)"
+}
+
+ebg_scale_out_worker_clone() {
+  ebg_scale_out "$(ebg_worker_clone_name)"
+}
+
+ebg_scale_out() {
+  local name="$1"
+  ebg_when_env_ready "$name"
+
+  local \
+    original_count="$(ebg_instance_count "$EB_ENV_NAME")" \
+    clone_count="$(ebg_instance_count "$name")"
+
+  [ "$original_count" -ne "$clone_count" ] || return 0
+
+  pushd "$SEMAPHORE_PROJECT_DIR"
+  eb use "$name"
+  eb scale "$original_count"
+  popd
+}
+
+ebg_when_env_ready() {
+  local name="$1"
+
+  echo -n Waiting for "$name" to be ready
+  while :; do
+    echo -n .
+    ebg_is_env_ready "$name" > /dev/null || continue
+    break
+  done
+  echo
+}
+
+ebg_is_env_ready() {
+  local name="$1"
+
+  aws elasticbeanstalk describe-environments \
+    --application-name "$EB_APP_NAME" \
+    --environment-name "$name" |
+  "$JQ_PATH" -e \
+    '.Environments[] | select(.Status == "Ready" and .HealthStatus == "Ok")'
+}
+
+ebg_instance_count() {
+  local name="$1"
+
+  aws elasticbeanstalk describe-environment-resources \
+    --environment-id "$(ebg_env_id "$name")" |
+  "$JQ_PATH" -e -r '.EnvironmentResources.Instances | length'
+}
+
+ebg_env_id() {
+  local name="$1"
+
+  aws elasticbeanstalk describe-environments \
+    --application-name "$EB_APP_NAME" \
+    --environment-name "$name" |
+  "$JQ_PATH" -e -r '.Environments[0].EnvironmentId'
+}

@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+eb_configure_cli() {
+  mkdir -vp \
+    ~/.aws \
+    "$SEMAPHORE_PROJECT_DIR/.elasticbeanstalk"
+
+  pushd "$CI_DEPLOY_DIR/data"
+  envsubst < aws-config-template > ~/.aws/config
+  envsubst < eb-config-template > "$SEMAPHORE_PROJECT_DIR/.elasticbeanstalk/config.yml"
+  popd
+}

@@ -1,9 +1,13 @@
 #!/bin/bash
 set -e
 
-SCRIPT_DIR="$(dirname "$0")"
+pushd "$(dirname "$0")/.."
+export CI_DEPLOY_DIR="$PWD"
+popd
 
-[ -n "$TAG" ] || . "$SCRIPT_DIR/get-tag"
+. "$CI_DEPLOY_DIR/lib/eb/blue-green-deploy"
+
+[ -n "$TAG" ] || . "$CI_DEPLOY_DIR/bin/get-tag"
 
 if [ -n "$BUILDING_APP_IMAGE" ]; then
   DOCKER_IMAGE="$APP_ECR_IMAGE"
@@ -19,9 +23,14 @@ export \
   ECR_REGION \
   DOCKER_IMAGE
 
-cd "$SCRIPT_DIR"
+cd "$CI_DEPLOY_DIR/bin"
 
 . ./get-jq
+
+if [ -n "$ENABLE_BLUE_GREEN_DEPLOY" ] && [ -n "$BUILDING_APP_IMAGE" ]; then
+  ebg_clone
+fi
+
 ./docker-build
 
 [ -n "$BUILDING_APP_IMAGE" ] || exit 0
@@ -30,7 +39,9 @@ cd "$SCRIPT_DIR"
 
 case "$CI_DEPLOY_TYPE" in
   eb)
+    [ -z "$ENABLE_BLUE_GREEN_DEPLOY" ] || ebg_swap_to_clone
     ./eb-deploy
+    [ -z "$ENABLE_BLUE_GREEN_DEPLOY" ] || ebg_swap_to_original
   ;;
   ecs)
     ./ecs-deploy
