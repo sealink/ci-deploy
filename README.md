@@ -11,11 +11,11 @@ use ECR, ECS and Elastic Beanstalk.
 1. For Elastic Beanstalk:
     1. If the application version doesn't exist in Elastic Beanstalk, create it.
     1. Finally trigger the Elastic Beanstalk deployment.
-    1. If the tag name starts with `base-`, the image will be built and pushed
-       but not deployed.
 1. For ECS:
     1. Create the task revision.
     1. Update the service with the revision.
+1. If the tag name starts with `base-`, the image will be built and pushed but
+   not deployed.
 
 ## Environment variables
 
