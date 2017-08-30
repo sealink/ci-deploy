@@ -9,6 +9,10 @@ ebg_clone() {
   pushd "$SEMAPHORE_PROJECT_DIR"
   eb use "$EB_ENV_NAME"
   eb clone -nh -n "$(ebg_clone_name)"
+  if [ -n "$EB_WORKER_ENV_NAME" ]; then
+    eb use "$EB_WORKER_ENV_NAME"
+    eb clone -nh -n "$(ebg_worker_clone_name)"
+  fi
   popd
 
   ebg_rememeber_to_cleanup
@@ -37,9 +41,17 @@ ebg_rememeber_to_cleanup() {
 }
 
 ebg_clone_name() {
+  echo "$EB_ENV_NAME$(ebg_clone_suffix)"
+}
+
+ebg_worker_clone_name() {
+  echo "$EB_WORKER_ENV_NAME$(ebg_clone_suffix)"
+}
+
+ebg_clone_suffix() {
   local suffix="$CLONE_EB_ENV_NAME_SUFFIX"
   [ -n "$suffix" ] || suffix=-clone
-  echo "$EB_ENV_NAME$suffix"
+  echo "$suffix"
 }
 
 ebg_fail_if_cloned() {
@@ -49,11 +61,16 @@ ebg_fail_if_cloned() {
 }
 
 ebg_is_cloned() {
+  ebg_exists "$(ebg_clone_name)" || ebg_exists "$(ebg_worker_clone_name)"
+}
+
+ebg_exists() {
+  local name="$i"
   aws elasticbeanstalk describe-environments \
     --application-name "$EB_APP_NAME" |
   "$JQ_PATH" \
     -e \
-    --arg name "$(ebg_clone_name)" \
+    --arg name "$name" \
     '.Environments[] | select(.EnvironmentName == $name and .Status != "Terminated")'
 }
 
@@ -79,10 +96,13 @@ ebg_cleanup() {
 
 ebg_terminate_clone() {
   pushd "$SEMAPHORE_PROJECT_DIR"
-  eb use "$(ebg_clone_name)"
-  while :; do
-    eb terminate -nh --force || continue
-    break
+  for name in "$(ebg_clone_name)" "$(ebg_worker_clone_name)"; do
+    ebg_exists "$name" || continue
+    eb use "$name"
+    while :; do
+      eb terminate -nh --force || continue
+      break
+    done
   done
   popd
 }
