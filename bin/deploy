@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 pushd "$(dirname "$0")/.."
 export CI_DEPLOY_DIR="$PWD"
