@@ -65,7 +65,7 @@ ebg_is_cloned() {
 }
 
 ebg_exists() {
-  local name="$i"
+  local name="$1"
   aws elasticbeanstalk describe-environments \
     --application-name "$EB_APP_NAME" |
   "$JQ_PATH" \
