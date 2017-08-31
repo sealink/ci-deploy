@@ -9,7 +9,7 @@ ebg_clone() {
   pushd "$SEMAPHORE_PROJECT_DIR"
   eb use "$EB_ENV_NAME"
   eb clone -nh -n "$(ebg_clone_name)"
-  if [ -n "$EB_WORKER_ENV_NAME" ]; then
+  if ebg_has_worker; then
     eb use "$EB_WORKER_ENV_NAME"
     eb clone -nh -n "$(ebg_worker_clone_name)"
   fi
@@ -20,13 +20,22 @@ ebg_clone() {
 
 ebg_swap_to_clone() {
   ebg_scale_out_clone
+  ! ebg_has_worker || ebg_scale_out_worker_clone
   ebg_when_env_ready "$(ebg_clone_name)"
   ebg_swap
 }
 
 ebg_swap_to_original() {
+  ebg_when_env_ready "$(ebg_worker_clone_name)"
+  if ebg_has_worker; then
+    pushd "$SEMAPHORE_PROJECT_DIR"
+    eb use "$EB_WORKER_ENV_NAME"
+    eb deploy -nh --version "$TAG"
+    popd
+  fi
   ebg_when_env_ready "$EB_ENV_NAME"
   ebg_swap
+  ! ebg_has_worker || ebg_when_env_ready "$EB_WORKER_ENV_NAME"
 }
 
 ebg_swap() {
@@ -34,6 +43,10 @@ ebg_swap() {
   eb use "$(ebg_clone_name)"
   eb swap -n "$EB_ENV_NAME"
   popd
+}
+
+ebg_has_worker() {
+  [ -n "$EB_WORKER_ENV_NAME" ]
 }
 
 ebg_rememeber_to_cleanup() {
@@ -66,6 +79,7 @@ ebg_is_cloned() {
 
 ebg_exists() {
   local name="$1"
+
   aws elasticbeanstalk describe-environments \
     --application-name "$EB_APP_NAME" |
   "$JQ_PATH" \
@@ -108,16 +122,25 @@ ebg_terminate_clone() {
 }
 
 ebg_scale_out_clone() {
-  ebg_when_env_ready "$(ebg_clone_name)"
+  ebg_scale_out "$(ebg_clone_name)"
+}
+
+ebg_scale_out_worker_clone() {
+  ebg_scale_out "$(ebg_worker_clone_name)"
+}
+
+ebg_scale_out() {
+  local name="$1"
+  ebg_when_env_ready "$name"
 
   local \
     original_count="$(ebg_instance_count "$EB_ENV_NAME")" \
-    clone_count="$(ebg_instance_count "$(ebg_clone_name)")"
+    clone_count="$(ebg_instance_count "$name")"
 
   [ "$original_count" -ne "$clone_count" ] || return 0
 
   pushd "$SEMAPHORE_PROJECT_DIR"
-  eb use "$(ebg_clone_name)"
+  eb use "$name"
   eb scale "$original_count"
   popd
 }
