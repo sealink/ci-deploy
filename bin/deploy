@@ -37,6 +37,10 @@ fi
 
 [ -n "$CI_DEPLOY_TYPE" ] || CI_DEPLOY_TYPE=eb
 
+if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+  ./rollbar-deploy
+fi
+
 case "$CI_DEPLOY_TYPE" in
   eb)
     [ -z "$ENABLE_BLUE_GREEN_DEPLOY" ] || ebg_swap_to_clone

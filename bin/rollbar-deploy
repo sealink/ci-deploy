@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+REQUEST=$(cat <<EOF
+  {
+    "access_token":"$ROLLBAR_ACCESS_TOKEN",
+    "environment":"$SEMAPHORE_SERVER_NAME",
+    "revision":"$REVISION",
+    "local_username":"$DEPLOY_AUTHOR_NAME",
+    "comment":"$TAG"
+  }
+EOF
+)
+curl -v --request POST \
+   --url https://api.rollbar.com/api/1/deploy/ \
+   --data "${REQUEST}"
