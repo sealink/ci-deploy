@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.4.0
 
 * [DO-72] Automate blue/green EB deployment
 * [TT-4814] Add support for rollbar deployment
