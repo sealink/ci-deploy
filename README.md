@@ -70,6 +70,19 @@ ECS_FAMILY=my-application
 ECS_SERVICE=my-application
 ```
 
+If you're using Rollbar:
+
+```
+ROLLBAR_ACCESS_TOKEN=myPostToken
+```
+
+The following Semaphore environment variables are also used for rollbar
+```
+REVISION
+SEMAPHORE_SERVER_NAME
+DEPLOY_AUTHOR_NAME
+```
+
 ### Optional variables
 
 You may override these if you know what you're doing.

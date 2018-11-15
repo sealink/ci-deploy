@@ -3,6 +3,7 @@
 ## Unreleased
 
 * [DO-72] Automate blue/green EB deployment
+* [TT-4814] Add support for rollbar deployment
 
 ## 1.3.1
 
