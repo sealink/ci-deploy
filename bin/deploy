@@ -4,17 +4,19 @@ export CI_DEPLOY_DIR="$PWD"
 popd
 
 export DEPLOY_STATUS='started'
-./rollbar-deploy
+"$CI_DEPLOY_DIR/bin/rollbar-deploy"
+
 retVal=$?
 if [ $retVal -eq 0 ]; then
-  ./run_deploy
+  "$CI_DEPLOY_DIR/bin/run-deploy"
 fi
 
 retVal=$?
 if [ $retVal -eq 0 ]; then
-  DEPLOY_STATUS='succeeded'
+  export DEPLOY_STATUS='succeeded'
 else
-  DEPLOY_STATUS='failed'
+  export DEPLOY_STATUS='failed'
 fi
-./rollbar-deploy
-exit retVal
+"$CI_DEPLOY_DIR/bin/rollbar-deploy"
+
+exit $?
