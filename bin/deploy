@@ -1,22 +1,67 @@
 #!/bin/bash
+
+function start_deployment {
+REQUEST=$(cat <<EOF
+  {
+    "access_token":"$ROLLBAR_ACCESS_TOKEN",
+    "environment":"$SEMAPHORE_SERVER_NAME",
+    "revision":"$REVISION",
+    "local_username":"$DEPLOY_AUTHOR_NAME",
+    "comment":"$TAG",
+    "status": "started"
+  }
+EOF
+)
+
+if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+  resp = curl -f -v --request POST \
+     --url https://api.rollbar.com/api/1/deploy/ \
+     --data "${REQUEST}"
+
+   DEPLOY_ID = resp | jq '.data.deploy_id'
+fi
+return 0
+}
+
+function execute_deployment {
+  if [ $? -eq 0 ]; then
+    "$CI_DEPLOY_DIR/bin/run-deploy"
+    exit 0
+  fi
+  exit 1
+}
+
+#
+# ARG1 - DEPLOYMENT STATUS
+#
+function complete_deployment {
+REQUEST=$(cat <<EOF
+  {
+    "access_token":"$ROLLBAR_ACCESS_TOKEN",
+    "deploy_id":"$DEPLOY_ID",
+    "status": "$1"
+  }
+EOF
+)
+
+if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+  resp = curl -f -v --request PATCH \
+     --url https://api.rollbar.com/api/1/deploy/ \
+     --data "${REQUEST}"
+fi
+return 0
+}
+
 pushd "$(dirname "$0")/.."
 export CI_DEPLOY_DIR="$PWD"
 popd
 
-export DEPLOY_STATUS='started'
-"$CI_DEPLOY_DIR/bin/rollbar-deploy"
-
-retVal=$?
+start_deployment
+execute_deployment
+retVal =  $?
 if [ $retVal -eq 0 ]; then
-  "$CI_DEPLOY_DIR/bin/run-deploy"
-fi
-
-retVal=$?
-if [ $retVal -eq 0 ]; then
-  export DEPLOY_STATUS='succeeded'
+  complete_deployment 'succeeded'
 else
-  export DEPLOY_STATUS='failed'
+  complete_deployment 'failed'
 fi
-"$CI_DEPLOY_DIR/bin/rollbar-deploy"
-
-exit $?
+exit $retVal
