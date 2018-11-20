@@ -1,6 +1,9 @@
 #!/bin/bash
 
-function start_deployment {
+#
+# ARG1 - DEPLOYMENT STATUS
+#
+function create_deployment {
 REQUEST=$(cat <<EOF
   {
     "access_token":"$ROLLBAR_ACCESS_TOKEN",
@@ -8,7 +11,7 @@ REQUEST=$(cat <<EOF
     "revision":"$REVISION",
     "local_username":"$DEPLOY_AUTHOR_NAME",
     "comment":"$TAG",
-    "status": "started"
+    "status": "$1"
   }
 EOF
 )
@@ -21,18 +24,11 @@ fi
 return 0
 }
 
-function execute_deployment {
-  if [ $? -eq 0 ]; then
-    "$CI_DEPLOY_DIR/bin/run-deploy"
-    return 0
-  fi
-  return 1
-}
-
 #
 # ARG1 - DEPLOYMENT STATUS
 #
-function complete_deployment {
+function update_deployment {
+
 REQUEST=$(cat <<EOF
   {
     "access_token":"$ROLLBAR_ACCESS_TOKEN",
@@ -50,11 +46,27 @@ fi
 return 0
 }
 
+function execute_deployment {
+  if [ $? -eq 0 ]; then
+    "$CI_DEPLOY_DIR/bin/run-deploy"
+    return 0
+  fi
+  return 1
+}
+
+function complete_deployment {
+  if [ $DEPLOY_ID -ne 0 ]; then
+    update_deployment $1
+  else
+    create_deployment $1
+  fi
+}
+
 pushd "$(dirname "$0")/.."
 export CI_DEPLOY_DIR="$PWD"
 popd
 
-start_deployment
+record_deployment 'started'
 execute_deployment
 retVal=$?
 if [ $retVal -ne 0 ]; then
