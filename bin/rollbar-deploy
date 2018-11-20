@@ -7,10 +7,15 @@ REQUEST=$(cat <<EOF
     "environment":"$SEMAPHORE_SERVER_NAME",
     "revision":"$REVISION",
     "local_username":"$DEPLOY_AUTHOR_NAME",
-    "comment":"$TAG"
+    "comment":"$TAG",
+    "status": "$DEPLOY_STATUS"
   }
 EOF
 )
-curl -v --request POST \
-   --url https://api.rollbar.com/api/1/deploy/ \
-   --data "${REQUEST}"
+
+if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+  curl -f -v --request POST \
+     --url https://api.rollbar.com/api/1/deploy/ \
+     --data "${REQUEST}"
+fi
+exit 0

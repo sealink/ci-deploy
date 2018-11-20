@@ -1,0 +1,49 @@
+#!/bin/bash
+set -e
+
+. "$CI_DEPLOY_DIR/lib/eb/blue-green-deploy"
+
+[ -n "$TAG" ] || . "$CI_DEPLOY_DIR/bin/get-tag"
+
+if [ -n "$BUILDING_APP_IMAGE" ]; then
+  DOCKER_IMAGE="$APP_ECR_IMAGE"
+  ECR_REGION="$APP_ECR_REGION"
+else
+  DOCKER_IMAGE="$BASE_ECR_IMAGE"
+  ECR_REGION="$BASE_ECR_REGION"
+fi
+
+[ -n "$ECR_REGION" ] || ECR_REGION="$AWS_DEFAULT_REGION"
+
+export \
+  ECR_REGION \
+  DOCKER_IMAGE
+
+cd "$CI_DEPLOY_DIR/bin"
+
+. ./get-jq
+
+if [ -n "$ENABLE_BLUE_GREEN_DEPLOY" ] && [ -n "$BUILDING_APP_IMAGE" ]; then
+  ebg_clone
+fi
+
+./docker-build
+
+[ -n "$BUILDING_APP_IMAGE" ] || exit 0
+
+[ -n "$CI_DEPLOY_TYPE" ] || CI_DEPLOY_TYPE=eb
+
+case "$CI_DEPLOY_TYPE" in
+  eb)
+    [ -z "$ENABLE_BLUE_GREEN_DEPLOY" ] || ebg_swap_to_clone
+    ./eb-deploy
+    [ -z "$ENABLE_BLUE_GREEN_DEPLOY" ] || ebg_swap_to_original
+  ;;
+  ecs)
+    ./ecs-deploy
+  ;;
+  *)
+    >&2 echo "Unsupport deployment type: $CI_DEPLOY_TYPE"
+    exit 1
+  ;;
+esac
