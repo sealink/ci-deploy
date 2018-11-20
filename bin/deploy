@@ -43,7 +43,7 @@ EOF
 )
 
 if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
-  resp = curl -f -v --request PATCH \
+  curl -f -v --request PATCH \
      --url https://api.rollbar.com/api/1/deploy/ \
      --data "${REQUEST}"
 fi
@@ -56,10 +56,10 @@ popd
 
 start_deployment
 execute_deployment
-retVal = $?
-if [ $retVal -eq 0 ]; then
-  complete_deployment 'succeeded'
-else
+retVal=$?
+if [ $retVal -ne 0 ]; then
   complete_deployment 'failed'
+else
+  complete_deployment 'succeeded'
 fi
 exit $retVal
