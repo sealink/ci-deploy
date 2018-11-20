@@ -4,44 +4,45 @@
 # ARG1 - DEPLOYMENT STATUS
 #
 function create_deployment {
-REQUEST=$(cat <<EOF
-  {
-    "access_token":"$ROLLBAR_ACCESS_TOKEN",
-    "environment":"$SEMAPHORE_SERVER_NAME",
-    "revision":"$REVISION",
-    "local_username":"$DEPLOY_AUTHOR_NAME",
-    "comment":"$TAG",
-    "status": "$1"
-  }
+  REQUEST=$(cat <<EOF
+    {
+      "access_token":"$ROLLBAR_ACCESS_TOKEN",
+      "environment":"$SEMAPHORE_SERVER_NAME",
+      "revision":"$REVISION",
+      "local_username":"$DEPLOY_AUTHOR_NAME",
+      "comment":"$TAG",
+      "status": "$1"
+    }
 EOF
-)
+  )
 
-if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
-  RESPONSE=$(curl -f --request POST \
-     --url https://api.rollbar.com/api/1/deploy/ \
-     --data "${REQUEST}")
+  if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+    RESPONSE=$(curl -f --request POST \
+       --url https://api.rollbar.com/api/1/deploy/ \
+       --data "${REQUEST}")
 
-  DEPLOY_ID=$(echo $RESPONSE | jq '.data.deploy_id')
-fi
-return 0
+    DEPLOY_ID=$(echo $RESPONSE | jq '.data.deploy_id')
+  fi
+  return 0
 }
 
 #
 # ARG1 - DEPLOYMENT STATUS
 #
 function update_deployment {
-REQUEST=$(cat <<EOF
-  {
-    "status": "$1"
-  }
+  REQUEST=$(cat <<EOF
+    {
+      "status": "$1"
+    }
 EOF
-)
-if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
-  curl -f -v --request PATCH \
-     --url https://api.rollbar.com/api/1/deploy/$DEPLOY_ID?access_token=$ROLLBAR_ACCESS_TOKEN \
-     --data "${REQUEST}"
-fi
-return 0
+  )
+
+  if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+    curl -f -v --request PATCH \
+       --url https://api.rollbar.com/api/1/deploy/$DEPLOY_ID?access_token=$ROLLBAR_ACCESS_TOKEN \
+       --data "${REQUEST}"
+  fi
+  return 0
 }
 
 function execute_deployment {
