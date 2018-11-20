@@ -1,57 +1,76 @@
 #!/bin/bash
-set -e
+
+#
+# ARG1 - DEPLOYMENT STATUS
+#
+function create_deployment {
+REQUEST=$(cat <<EOF
+  {
+    "access_token":"$ROLLBAR_ACCESS_TOKEN",
+    "environment":"$SEMAPHORE_SERVER_NAME",
+    "revision":"$REVISION",
+    "local_username":"$DEPLOY_AUTHOR_NAME",
+    "comment":"$TAG",
+    "status": "$1"
+  }
+EOF
+)
+
+if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+  RESPONSE=$(curl -f --request POST \
+     --url https://api.rollbar.com/api/1/deploy/ \
+     --data "${REQUEST}")
+
+  DEPLOY_ID=$(echo $RESPONSE | jq '.data.deploy_id')
+fi
+return 0
+}
+
+#
+# ARG1 - DEPLOYMENT STATUS
+#
+function update_deployment {
+REQUEST=$(cat <<EOF
+  {
+    "status": "$1"
+  }
+EOF
+)
+if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
+  curl -f -v --request PATCH \
+     --url https://api.rollbar.com/api/1/deploy/$DEPLOY_ID?access_token=$ROLLBAR_ACCESS_TOKEN \
+     --data "${REQUEST}"
+fi
+return 0
+}
+
+function execute_deployment {
+  if [ $? -eq 0 ]; then
+    "$CI_DEPLOY_DIR/bin/run-deploy"
+    return 0
+  fi
+  return 1
+}
+
+function complete_deployment {
+  if [ $DEPLOY_ID -ne 0 ]; then
+    update_deployment $1
+  else
+    create_deployment $1
+  fi
+}
 
 pushd "$(dirname "$0")/.."
 export CI_DEPLOY_DIR="$PWD"
 popd
+export DEPLOY_ID=0
 
-. "$CI_DEPLOY_DIR/lib/eb/blue-green-deploy"
-
-[ -n "$TAG" ] || . "$CI_DEPLOY_DIR/bin/get-tag"
-
-if [ -n "$BUILDING_APP_IMAGE" ]; then
-  DOCKER_IMAGE="$APP_ECR_IMAGE"
-  ECR_REGION="$APP_ECR_REGION"
+create_deployment 'started'
+execute_deployment
+retVal=$?
+if [ $retVal -ne 0 ]; then
+  complete_deployment 'failed'
 else
-  DOCKER_IMAGE="$BASE_ECR_IMAGE"
-  ECR_REGION="$BASE_ECR_REGION"
+  complete_deployment 'succeeded'
 fi
-
-[ -n "$ECR_REGION" ] || ECR_REGION="$AWS_DEFAULT_REGION"
-
-export \
-  ECR_REGION \
-  DOCKER_IMAGE
-
-cd "$CI_DEPLOY_DIR/bin"
-
-. ./get-jq
-
-if [ -n "$ENABLE_BLUE_GREEN_DEPLOY" ] && [ -n "$BUILDING_APP_IMAGE" ]; then
-  ebg_clone
-fi
-
-./docker-build
-
-[ -n "$BUILDING_APP_IMAGE" ] || exit 0
-
-[ -n "$CI_DEPLOY_TYPE" ] || CI_DEPLOY_TYPE=eb
-
-if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
-  ./rollbar-deploy
-fi
-
-case "$CI_DEPLOY_TYPE" in
-  eb)
-    [ -z "$ENABLE_BLUE_GREEN_DEPLOY" ] || ebg_swap_to_clone
-    ./eb-deploy
-    [ -z "$ENABLE_BLUE_GREEN_DEPLOY" ] || ebg_swap_to_original
-  ;;
-  ecs)
-    ./ecs-deploy
-  ;;
-  *)
-    >&2 echo "Unsupport deployment type: $CI_DEPLOY_TYPE"
-    exit 1
-  ;;
-esac
+exit $retVal
