@@ -1,5 +1,10 @@
 # Deployment Scripts for CI
 
+
+## 1.4.1 Unreleased
+
+* [TT-4864] Report the different stages to rollbar
+
 ## 1.4.0
 
 * [DO-72] Automate blue/green EB deployment
