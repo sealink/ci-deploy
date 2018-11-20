@@ -17,9 +17,11 @@ EOF
 )
 
 if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
-  DEPLOY_ID=$(curl -f --request POST \
+  RESPONSE=$(curl -f --request POST \
      --url https://api.rollbar.com/api/1/deploy/ \
-     --data "${REQUEST}") | jq '.data.deploy_id'
+     --data "${REQUEST}")
+
+  DEPLOY_ID=$(echo $RESPONSE | jq '.data.deploy_id')
 fi
 return 0
 }
@@ -28,19 +30,15 @@ return 0
 # ARG1 - DEPLOYMENT STATUS
 #
 function update_deployment {
-
 REQUEST=$(cat <<EOF
   {
-    "access_token":"$ROLLBAR_ACCESS_TOKEN",
-    "deploy_id":"$DEPLOY_ID",
     "status": "$1"
   }
 EOF
 )
-
 if [ -n "$ROLLBAR_ACCESS_TOKEN" ]; then
   curl -f -v --request PATCH \
-     --url https://api.rollbar.com/api/1/deploy/ \
+     --url https://api.rollbar.com/api/1/deploy/$DEPLOY_ID?access_token=$ROLLBAR_ACCESS_TOKEN \
      --data "${REQUEST}"
 fi
 return 0
@@ -65,6 +63,7 @@ function complete_deployment {
 pushd "$(dirname "$0")/.."
 export CI_DEPLOY_DIR="$PWD"
 popd
+export DEPLOY_ID=0
 
 create_deployment 'started'
 execute_deployment
