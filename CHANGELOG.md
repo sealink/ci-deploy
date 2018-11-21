@@ -1,7 +1,6 @@
 # Deployment Scripts for CI
 
-
-## 1.4.1 Unreleased
+## 1.4.1
 
 * [TT-4864] Report the different stages to rollbar
 
