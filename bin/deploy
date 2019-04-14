@@ -48,7 +48,7 @@ EOF
 function execute_deployment {
   if [ $? -eq 0 ]; then
     "$CI_DEPLOY_DIR/bin/run-deploy"
-    return 0
+    return $?
   fi
   return 1
 }
