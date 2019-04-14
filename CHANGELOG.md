@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [TT-4899] Return the correct error code from the deployment
+
 ## 1.4.1
 
 * [TT-4864] Report the different stages to rollbar
