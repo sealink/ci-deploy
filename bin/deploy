@@ -61,6 +61,13 @@ function complete_deployment {
   fi
 }
 
+function update_pact_broker {
+  if [ -n "$PACT_BROKER_URL" ]; then
+    ./get-jq
+    ./pact-create-version-tag
+  fi
+}
+
 pushd "$(dirname "$0")/.."
 export CI_DEPLOY_DIR="$PWD"
 popd
@@ -68,6 +75,7 @@ export DEPLOY_ID=0
 
 create_deployment 'started'
 execute_deployment
+update_pact_broker
 retVal=$?
 if [ $retVal -ne 0 ]; then
   complete_deployment 'failed'

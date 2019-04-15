@@ -1,0 +1,2 @@
+PACT_VERSION="$BRANCH_NAME+$REVISION"
+./pact/bin/pact-broker create-version-tag --pacticipant PACT_PARTICIPANT--version $PACT_VERSION -t $STAGE --broker-base-url $PACT_BROKER_URL

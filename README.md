@@ -83,6 +83,14 @@ SEMAPHORE_SERVER_NAME
 DEPLOY_AUTHOR_NAME
 ```
 
+If you're using Pact:
+
+```
+PACT_BROKER_URL=https://pact-broker.travellink.com.au
+PACT_PARTICIPANT=Quicktravel
+STAGE=next
+```
+
 ### Optional variables
 
 You may override these if you know what you're doing.
