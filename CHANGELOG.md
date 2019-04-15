@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [TT-5370] Add support for Pact
+
 ## 1.4.1
 
 * [TT-4864] Report the different stages to rollbar
