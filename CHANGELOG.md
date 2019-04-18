@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## 1.5.1 Unreleased
+
+* [TT-5396] Fix Paths / SHA and pact commands
+
 ## 1.5.0
 
 * [TT-5370] Add support for Pact

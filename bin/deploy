@@ -63,8 +63,8 @@ function complete_deployment {
 
 function update_pact_broker {
   if [ -n "$PACT_BROKER_URL" ]; then
-    ./get-pact
-    ./pact-create-version-tag
+    "$CI_DEPLOY_DIR/bin/get-pact"
+    "$CI_DEPLOY_DIR/bin/pact-create-version-tag"
   fi
 }
 
