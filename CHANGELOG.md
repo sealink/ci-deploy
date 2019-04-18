@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* [TT-5370] Add support for Pact
 * [TT-4899] Return the correct error code from the deployment
 
 ## 1.4.1
