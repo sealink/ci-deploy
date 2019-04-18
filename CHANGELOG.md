@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## 1.5.1 Unreleased
+## 1.5.1
 
 * [TT-5396] Fix Paths / SHA and pact commands
 
