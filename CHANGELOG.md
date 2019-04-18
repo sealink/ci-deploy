@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.5.0
 
 * [TT-5370] Add support for Pact
 * [TT-4899] Return the correct error code from the deployment
