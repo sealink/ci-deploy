@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.5.2 / 1.5.3
 
 * [TT-5423] Only create pact-versions when the participant is defined
 
