@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [TT-5423] Only create pact-versions when the participant is defined
+
 ## 1.5.1
 
 * [TT-5396] Fix Paths / SHA and pact commands
