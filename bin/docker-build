@@ -20,7 +20,7 @@ $(aws ecr get-login --no-include-email --region "$ECR_REGION")
 [ -z "$BASE_ECR_REGION" ] || $(aws ecr get-login --no-include-email --region "$BASE_ECR_REGION")
 docker build --build-arg VERSION="$TAG" \
   --build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
-  --build-arg REVISION="$REVISION"
+  --build-arg REVISION="$REVISION" \
   -f "$SEMAPHORE_PROJECT_DIR/$DOCKERFILE" \
   -t "$DOCKER_IMAGE":"$TAG" "$SEMAPHORE_PROJECT_DIR"
 docker push "$DOCKER_IMAGE":"$TAG"
