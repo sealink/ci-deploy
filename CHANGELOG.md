@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [TT-5459] Add BUILD_DATE and REVISION as docker build arguments
+
 ## 1.5.2 / 1.5.3
 
 * [TT-5423] Only create pact-versions when the participant is defined
