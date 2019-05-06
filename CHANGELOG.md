@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.6.0
 
 * [TT-5459] Add BUILD_DATE and REVISION as docker build arguments
 
