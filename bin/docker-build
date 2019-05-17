@@ -18,6 +18,8 @@ DOCKERFILE=Dockerfile
 
 $(aws ecr get-login --no-include-email --region "$ECR_REGION")
 [ -z "$BASE_ECR_REGION" ] || $(aws ecr get-login --no-include-email --region "$BASE_ECR_REGION")
+
+#Environment variables from Semaphore
 docker build \
   --build-arg AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
   --build-arg AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
