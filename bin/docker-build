@@ -20,9 +20,6 @@ $(aws ecr get-login --no-include-email --region "ap-southeast-2")
 
 #Environment variables from Semaphore
 docker build \
-  --build-arg AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
-  --build-arg AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
-  --build-arg ASSETS_BUCKET="$ASSETS_BUCKET" \
   --build-arg VERSION="$TAG" \
   --build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
   --build-arg REVISION="$REVISION" \
