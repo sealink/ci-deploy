@@ -2,11 +2,11 @@
 set -e
 
 JQ_QUERY='.repositories[] | select(.repositoryUri == "'"$DOCKER_IMAGE"'") | .repositoryName'
-ECR_REPOSITORY_NAME="$(aws ecr describe-repositories --region "$ECR_REGION" | "$JQ_PATH" -r "$JQ_QUERY")"
+ECR_REPOSITORY_NAME="$(aws ecr describe-repositories --region "ap-southeast-2" | "$JQ_PATH" -r "$JQ_QUERY")"
 [ -n "$ECR_REPOSITORY_NAME" ] || ( >&2 echo "Can't find the ECR repository."  && exit 1 )
 
 JQ_QUERY='.imageDetails[] | select(.imageTags[]? | . == "'"$TAG"'")'
-if aws ecr describe-images --region "$ECR_REGION" --repository-name "$ECR_REPOSITORY_NAME" | "$JQ_PATH" -e "$JQ_QUERY"; then
+if aws ecr describe-images --region "ap-southeast-2" --repository-name "$ECR_REPOSITORY_NAME" | "$JQ_PATH" -e "$JQ_QUERY"; then
   echo Skip image building because it has already been built.
   exit
 fi
@@ -16,14 +16,12 @@ rm -Rf ~/.{rbenv,phpbrew,nvm}
 DOCKERFILE=Dockerfile
 [ -n "$BUILDING_APP_IMAGE" ] || DOCKERFILE=Dockerfile.base
 
-$(aws ecr get-login --no-include-email --region "$ECR_REGION")
-[ -z "$BASE_ECR_REGION" ] || $(aws ecr get-login --no-include-email --region "$BASE_ECR_REGION")
+$(aws ecr get-login --no-include-email --region "ap-southeast-2")
 
 #Environment variables from Semaphore
 docker build \
   --build-arg AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY_ID" \
   --build-arg AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
-  --build-arg AWS_DEFAULT_REGION="$AWS_DEFAULT_REGION" \
   --build-arg ASSETS_BUCKET="$ASSETS_BUCKET" \
   --build-arg VERSION="$TAG" \
   --build-arg BUILD_DATE=`date -u +”%Y-%m-%dT%H:%M:%SZ”` \
