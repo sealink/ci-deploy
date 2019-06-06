@@ -1,8 +1,11 @@
 #!/bin/bash
 set -e
 
+echo  Docker_IMAGE : $DOCKER_IMAGE
 JQ_QUERY='.repositories[] | select(.repositoryUri == "'"$DOCKER_IMAGE"'") | .repositoryName'
-echo $JQ_QUERY
+echo  JQ_QUERY One: $JQ_QUERY
+echo  JQ_PATH One: $JQ_PATH
+
 ECR_REPOSITORY_NAME="$(aws ecr describe-repositories --region "$ECR_REGION" | "$JQ_PATH" -r "$JQ_QUERY")"
 echo $ECR_REPOSITORY_NAME
 [ -n "$ECR_REPOSITORY_NAME" ] || ( >&2 echo "Can't find the ECR repository."  && exit 1 )
