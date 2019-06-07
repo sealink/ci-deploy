@@ -1,22 +1,10 @@
 #!/bin/bash
 set -e
 
-JQ_QUERY='.repositories[] | select(.repositoryUri == "'"$DOCKER_IMAGE"'") | .repositoryName'
-ECR_REPOSITORY_NAME="$(aws ecr describe-repositories --region "$ECR_REGION" | "$JQ_PATH" -r "$JQ_QUERY")"
-[ -n "$ECR_REPOSITORY_NAME" ] || ( >&2 echo "Can't find the ECR repository."  && exit 1 )
+cd ../../../..
 
-JQ_QUERY='.imageDetails[] | select(.imageTags[]? | . == "'"$TAG"'")'
-if aws ecr describe-images --region "$ECR_REGION" --repository-name "$ECR_REPOSITORY_NAME" | "$JQ_PATH" -e "$JQ_QUERY"; then
-  echo Skip image building because it has already been built.
-  exit
-fi
+docker build -t one-sealink . --build-arg VERSION="$TAG"
 
-rm -Rf ~/.{rbenv,phpbrew,nvm}
+docker tag one-sealink:latest 120983864185.dkr.ecr.ap-southeast-2.amazonaws.com/one-sealink:"$TAG"
 
-DOCKERFILE=Dockerfile
-[ -n "$BUILDING_APP_IMAGE" ] || DOCKERFILE=Dockerfile.base
-
-$(aws ecr get-login --no-include-email --region "$ECR_REGION")
-[ -z "$BASE_ECR_REGION" ] || $(aws ecr get-login --region "$BASE_ECR_REGION")
-docker build --build-arg VERSION="$TAG" -f "$SEMAPHORE_PROJECT_DIR/$DOCKERFILE" -t "$DOCKER_IMAGE":"$TAG" "$SEMAPHORE_PROJECT_DIR"
-docker push "$DOCKER_IMAGE":"$TAG"
+docker push 120983864185.dkr.ecr.ap-southeast-2.amazonaws.com/one-sealink:"$TAG"
