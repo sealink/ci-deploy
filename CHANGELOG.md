@@ -1,5 +1,10 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [TT-6768] PACT_PARTICIPANT env can now be comma separated list of participants
+
+
 ## 1.6.0
 
 * [TT-5459] Add BUILD_DATE and REVISION as docker build arguments
