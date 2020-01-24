@@ -1,2 +1,9 @@
 PACT_VERSION="$BRANCH_NAME+$REVISION"
-./pact/bin/pact-broker create-version-tag --pacticipant $PACT_PARTICIPANT --version $PACT_VERSION -t $STAGE --broker-base-url $PACT_BROKER_URL
+IFS=',' read -ra PARTICIPANTS <<< "$PACT_PARTICIPANT"
+
+for PARTICIPANT in "${PARTICIPANTS[@]}"
+do
+  ./pact/bin/pact-broker create-version-tag --pacticipant $PARTICIPANT --version $PACT_VERSION -t $STAGE --broker-base-url $PACT_BROKER_URL
+done
+
+
