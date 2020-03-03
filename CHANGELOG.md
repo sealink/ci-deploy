@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [TT-6961] Added can-i-deploy wrapper, updated PACT cli tool
+
 ## 1.7.0
 
 * [TT-6768] PACT_PARTICIPANT env can now be comma separated list of participants
