@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.8.0
 
 * [TT-6961] Added can-i-deploy wrapper, updated PACT cli tool
 
