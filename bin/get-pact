@@ -4,7 +4,7 @@ set -e
 if [ -d "$CI_DEPLOY_DIR/pact" ]; then
   echo "Pact already downloaded... Skipping"
 else
-  curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.64.0/pact-1.64.0-linux-x86_64.tar.gz
-  tar xzf pact-1.64.0-linux-x86_64.tar.gz
-  sha256sum -c "$CI_DEPLOY_DIR/data/pact-sha256sum" < pact-1.64.0-linux-x86_64.tar.gz
+  curl -LO https://github.com/pact-foundation/pact-ruby-standalone/releases/download/v1.81.0/pact-1.81.0-linux-x86_64.tar.gz
+  tar xzf pact-1.81.0-linux-x86_64.tar.gz
+  sha256sum -c "$CI_DEPLOY_DIR/data/pact-sha256sum" < pact-1.81.0-linux-x86_64.tar.gz
 fi
