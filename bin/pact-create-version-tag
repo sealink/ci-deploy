@@ -1,9 +1,24 @@
+#
+# allows passing multiple tags through via a comma seperated command
+#
+function build_tag_arguments {
+  TAGS_STRING=""
+  IFS=',' read -ra TAGS <<< "$1"
+
+  for tag in "${TAGS[@]}"
+  do
+    TAGS_STRING+="-t $tag "
+  done
+  # Trim the trailing space
+  TAGS_STRING=$(echo $TAGS_STRING | xargs)
+}
+
+build_tag_arguments $STAGE
+
 PACT_VERSION="$BRANCH_NAME+$REVISION"
 IFS=',' read -ra PARTICIPANTS <<< "$PACT_PARTICIPANT"
 
 for PARTICIPANT in "${PARTICIPANTS[@]}"
 do
-  ./pact/bin/pact-broker create-version-tag --pacticipant $PARTICIPANT --version $PACT_VERSION -t $STAGE --broker-base-url $PACT_BROKER_URL
+  ./pact/bin/pact-broker create-version-tag --pacticipant $PARTICIPANT --version $PACT_VERSION --broker-base-url $PACT_BROKER_URL $TAGS_STRING
 done
-
-
