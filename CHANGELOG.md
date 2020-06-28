@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## Unreleased
+
+* [TT-7529] Allow creating version tags for multiple stages (i.e. production, edge)
+
 ## 1.8.0
 
 * [TT-6961] Added can-i-deploy wrapper, updated PACT cli tool
