@@ -15,7 +15,7 @@ function build_tag_arguments {
 
 build_tag_arguments $STAGE
 
-PACT_VERSION="$BRANCH_NAME+$REVISION"
+PACT_VERSION="$REVISION"
 IFS=',' read -ra PARTICIPANTS <<< "$PACT_PARTICIPANT"
 
 for PARTICIPANT in "${PARTICIPANTS[@]}"
