@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## Unreleased
+## 1.9.0
 
 * [TT-7529] Allow creating version tags for multiple stages (i.e. production, edge)
 
