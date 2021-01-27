@@ -6,7 +6,7 @@ function check_can_i_deploy {
   if [ -n "$PACT_PARTICIPANT" ]; then
     "$CI_DEPLOY_DIR/bin/get-pact"
 
-    PACT_VERSION="$BRANCH_NAME+$REVISION"
+    PACT_VERSION="$REVISION"
     IFS=',' read -ra PARTICIPANTS <<< "$PACT_PARTICIPANT"
 
     for PARTICIPANT in "${PARTICIPANTS[@]}" ; do
