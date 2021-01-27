@@ -1,5 +1,9 @@
 # Deployment Scripts for CI
 
+## 2.0.0. Unreleased
+
+* [TT-8761] Realign pact consumer versions with how we build in semaphore / pipelines
+
 ## 1.9.0
 
 * [TT-7529] Allow creating version tags for multiple stages (i.e. production, edge)
