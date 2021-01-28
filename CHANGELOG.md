@@ -1,6 +1,6 @@
 # Deployment Scripts for CI
 
-## 2.0.0. Unreleased
+## 2.0.0
 
 * [TT-8761] Realign pact consumer versions with how we build in semaphore / pipelines
 
